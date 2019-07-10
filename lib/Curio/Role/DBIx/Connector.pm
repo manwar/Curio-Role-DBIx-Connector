@@ -11,7 +11,6 @@ use strictures 2;
 use namespace::clean;
 
 with 'Curio::Role';
-with 'MooX::BuildArgs';
 
 after initialize => sub{
     my ($class) = @_;
@@ -81,17 +80,17 @@ Create a Curio class:
     
     sub dsn {
         my ($self) = @_;
-        return my_config( 'db_dsn' )->{ $self->key() };
+        return myapp_config( 'db_dsn' )->{ $self->key() };
     }
     
     sub username {
         my ($self) = @_;
-        return my_config( 'db_username' )->{ $self->key() };
+        return myapp_config( 'db_username' )->{ $self->key() };
     }
     
     sub password {
         my ($self) = @_;
-        return my_secrets( $self->key() );
+        return myapp_secret( $self->key() );
     }
     
     sub attributes {
@@ -161,9 +160,9 @@ You can of course disable this feature.
 =head1 SUPPORT
 
 Please submit bugs and feature requests to the
-Curio-Role-CHI GitHub issue tracker:
+Curio-Role-DBIx-Connector GitHub issue tracker:
 
-L<https://github.com/bluefeet/Curio-Role-CHI/issues>
+L<https://github.com/bluefeet/Curio-Role-DBIx-Connector/issues>
 
 =head1 ACKNOWLEDGEMENTS
 

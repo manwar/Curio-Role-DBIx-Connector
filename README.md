@@ -27,17 +27,17 @@ has key => (
 
 sub dsn {
     my ($self) = @_;
-    return my_config( 'db_dsn' )->{ $self->key() };
+    return myapp_config( 'db_dsn' )->{ $self->key() };
 }
 
 sub username {
     my ($self) = @_;
-    return my_config( 'db_username' )->{ $self->key() };
+    return myapp_config( 'db_username' )->{ $self->key() };
 }
 
 sub password {
     my ($self) = @_;
-    return my_secrets( $self->key() );
+    return myapp_secret( $self->key() );
 }
 
 sub attributes {
@@ -122,9 +122,9 @@ does_caching 0;
 # SUPPORT
 
 Please submit bugs and feature requests to the
-Curio-Role-CHI GitHub issue tracker:
+Curio-Role-DBIx-Connector GitHub issue tracker:
 
-[https://github.com/bluefeet/Curio-Role-CHI/issues](https://github.com/bluefeet/Curio-Role-CHI/issues)
+[https://github.com/bluefeet/Curio-Role-DBIx-Connector/issues](https://github.com/bluefeet/Curio-Role-DBIx-Connector/issues)
 
 # ACKNOWLEDGEMENTS
 

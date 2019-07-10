@@ -42,11 +42,11 @@
       },
       "runtime" : {
          "requires" : {
-            "Curio" : "0.02",
-            "Curio::Role" : "0.01",
-            "DBIx::Connector" : "0.60",
+            "Curio::Role" : "0.02",
+            "DBIx::Connector" : "0.53",
             "Moo::Role" : "2.003000",
-            "MooX::BuildArgs" : "0.08",
+            "Scalar::Util" : "0",
+            "Types::Common::String" : "1.002001",
             "Types::Standard" : "1.002001",
             "namespace::clean" : "0.27",
             "perl" : "5.008001",
@@ -55,11 +55,24 @@
       },
       "test" : {
          "requires" : {
+            "Curio" : "0.02",
+            "Exporter" : "0",
             "Test2::V0" : "0.000094"
          }
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/bluefeet/Curio-Role-DBIx-Connector/issues"
+      },
+      "homepage" : "https://github.com/bluefeet/Curio-Role-DBIx-Connector",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/bluefeet/Curio-Role-DBIx-Connector.git",
+         "web" : "https://github.com/bluefeet/Curio-Role-DBIx-Connector"
+      }
+   },
    "version" : "0.01",
    "x_authority" : "cpan:BLUEFEET",
    "x_serialization_backend" : "JSON::PP version 4.02",

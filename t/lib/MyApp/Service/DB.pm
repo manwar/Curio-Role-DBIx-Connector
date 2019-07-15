@@ -6,10 +6,8 @@ use MyApp::Secrets;
 use Curio role => '::DBIx::Connector';
 use strictures 2;
 
-use Exporter qw( import );
-our @EXPORT = qw( myapp_db );
-
 key_argument 'key';
+export_function_name 'myapp_db';
 
 add_key 'main';
 add_key 'analytics';
@@ -36,10 +34,6 @@ sub password {
 
 sub attributes {
     return { PrintError=>1 };
-}
-
-sub myapp_db {
-    return __PACKAGE__->fetch( @_ )->connector();
 }
 
 1;

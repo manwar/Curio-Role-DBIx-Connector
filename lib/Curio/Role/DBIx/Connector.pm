@@ -2,9 +2,8 @@ package Curio::Role::DBIx::Connector;
 our $VERSION = '0.01';
 
 use DBIx::Connector;
-use Scalar::Util qw( weaken );
 use Types::Common::String qw( NonEmptySimpleStr SimpleStr );
-use Types::Standard qw( InstanceOf HashRef Undef );
+use Types::Standard qw( InstanceOf HashRef );
 
 use Moo::Role;
 use strictures 2;
@@ -26,15 +25,16 @@ has connector => (
     is  => 'lazy',
     isa => InstanceOf[ 'DBIx::Connector' ],
 );
+
 sub _build_connector {
     my ($self) = @_;
 
-    my $dsn = $self->dsn();
-    my $username = $self->can('username') ? $self->username() : '';
-    my $password = $self->can('password') ? $self->password() : '';
+    my $dsn        = $self->dsn();
+    my $username   = $self->can('username') ? $self->username() : '';
+    my $password   = $self->can('password') ? $self->password() : '';
     my $attributes = $self->can('attributes') ? $self->attributes() : {};
 
-    my $db = DBIx::Connector->new(
+    return DBIx::Connector->new(
         $dsn,
         $username,
         $password,
@@ -43,8 +43,6 @@ sub _build_connector {
             %$attributes,
         },
     );
-
-    return $db;
 }
 
 1;
@@ -65,10 +63,8 @@ Create a Curio class:
     use Curio role => '::DBIx::Connector';
     use strictures 2;
     
-    use Exporter qw( import );
-    our @EXPORT = qw( myapp_db );
-    
     key_argument 'key';
+    export_function_name 'myapp_db';
     
     add_key 'writer';
     add_key 'reader';
@@ -80,34 +76,30 @@ Create a Curio class:
     
     sub dsn {
         my ($self) = @_;
-        return myapp_config( 'db_dsn' )->{ $self->key() };
+        return myapp_config()->{db}->{ $self->key() }->{dsn};
     }
     
     sub username {
         my ($self) = @_;
-        return myapp_config( 'db_username' )->{ $self->key() };
+        return myapp_config()->{db}->{ $self->key() }->{username};
     }
     
     sub password {
         my ($self) = @_;
-        return myapp_secret( $self->key() );
+        return myapp_secret( $self->key() . '_' . $self->username() );
     }
     
     sub attributes {
         return { PrintError=>1 };
     }
     
-    sub myapp_db {
-        return __PACKAGE__->fetch( @_ )->connector();
-    }
-    
     1;
 
 Then use your new Curio class elsewhere:
 
-    use MyApp::Service::DB;
+    use MyApp::Service::DB qw( myapp_db );
     
-    my $db = myapp_db('writer');
+    my $db = myapp_db('writer')->connector();
     
     $db->run(sub{
         $_->do( 'CREATE TABLE foo ( bar )' );
@@ -118,7 +110,7 @@ Then use your new Curio class elsewhere:
 This role provides all the basics for building a Curio class
 which wraps around L<DBIx::Connector>.
 
-=head1 ATTRIBUTES
+=head1 ARGUMENTS
 
 =head2 connector
 
@@ -131,6 +123,8 @@ Holds the L<DBIx::Connector> object.
 =head2 dsn
 
     sub dsn { 'dbi:...' }
+
+=head1 OPTIONAL METHODS
 
 =head2 username
 

@@ -42,10 +42,9 @@
       },
       "runtime" : {
          "requires" : {
-            "Curio::Role" : "0.02",
+            "Curio::Role" : "0.04",
             "DBIx::Connector" : "0.53",
             "Moo::Role" : "2.003000",
-            "Scalar::Util" : "0",
             "Types::Common::String" : "1.002001",
             "Types::Standard" : "1.002001",
             "namespace::clean" : "0.27",
@@ -55,8 +54,7 @@
       },
       "test" : {
          "requires" : {
-            "Curio" : "0.02",
-            "Exporter" : "0",
+            "Curio" : "0.04",
             "Test2::V0" : "0.000094"
          }
       }
@@ -75,6 +73,6 @@
    },
    "version" : "0.01",
    "x_authority" : "cpan:BLUEFEET",
-   "x_serialization_backend" : "JSON::PP version 4.02",
+   "x_serialization_backend" : "JSON::PP version 4.04",
    "x_static_install" : 1
 }

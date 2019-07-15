@@ -12,10 +12,8 @@ package MyApp::Service::DB;
 use Curio role => '::DBIx::Connector';
 use strictures 2;
 
-use Exporter qw( import );
-our @EXPORT = qw( myapp_db );
-
 key_argument 'key';
+export_function_name 'myapp_db';
 
 add_key 'writer';
 add_key 'reader';
@@ -27,25 +25,21 @@ has key => (
 
 sub dsn {
     my ($self) = @_;
-    return myapp_config( 'db_dsn' )->{ $self->key() };
+    return myapp_config()->{db}->{ $self->key() }->{dsn};
 }
 
 sub username {
     my ($self) = @_;
-    return myapp_config( 'db_username' )->{ $self->key() };
+    return myapp_config()->{db}->{ $self->key() }->{username};
 }
 
 sub password {
     my ($self) = @_;
-    return myapp_secret( $self->key() );
+    return myapp_secret( $self->key() . '_' . $self->username() );
 }
 
 sub attributes {
     return { PrintError=>1 };
-}
-
-sub myapp_db {
-    return __PACKAGE__->fetch( @_ )->connector();
 }
 
 1;
@@ -54,9 +48,9 @@ sub myapp_db {
 Then use your new Curio class elsewhere:
 
 ```perl
-use MyApp::Service::DB;
+use MyApp::Service::DB qw( myapp_db );
 
-my $db = myapp_db('writer');
+my $db = myapp_db('writer')->connector();
 
 $db->run(sub{
     $_->do( 'CREATE TABLE foo ( bar )' );
@@ -68,7 +62,7 @@ $db->run(sub{
 This role provides all the basics for building a Curio class
 which wraps around [DBIx::Connector](https://metacpan.org/pod/DBIx::Connector).
 
-# ATTRIBUTES
+# ARGUMENTS
 
 ## connector
 
@@ -85,6 +79,8 @@ Holds the [DBIx::Connector](https://metacpan.org/pod/DBIx::Connector) object.
 ```perl
 sub dsn { 'dbi:...' }
 ```
+
+# OPTIONAL METHODS
 
 ## username
 

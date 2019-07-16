@@ -12,4 +12,5 @@ on test => sub {
     requires 'Test2::V0' => '0.000094';
 
     requires 'Curio' => '0.04';
+    requires 'DBD::SQLite' => '1.44';
 };

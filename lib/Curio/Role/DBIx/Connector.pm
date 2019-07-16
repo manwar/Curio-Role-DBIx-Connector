@@ -120,11 +120,15 @@ Holds the L<DBIx::Connector> object.
 
 =head1 REQUIRED METHODS
 
+These methods must be implemented by the consuming curio class.
+
 =head2 dsn
 
     sub dsn { 'dbi:...' }
 
 =head1 OPTIONAL METHODS
+
+These methods may be implemented by the consuming curio class.
 
 =head2 username
 

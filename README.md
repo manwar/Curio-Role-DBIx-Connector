@@ -74,6 +74,8 @@ Holds the [DBIx::Connector](https://metacpan.org/pod/DBIx::Connector) object.
 
 # REQUIRED METHODS
 
+These methods must be implemented by the consuming curio class.
+
 ## dsn
 
 ```perl
@@ -81,6 +83,8 @@ sub dsn { 'dbi:...' }
 ```
 
 # OPTIONAL METHODS
+
+These methods may be implemented by the consuming curio class.
 
 ## username
 

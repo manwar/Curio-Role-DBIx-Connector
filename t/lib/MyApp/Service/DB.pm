@@ -8,6 +8,9 @@ use strictures 2;
 
 key_argument 'key';
 export_function_name 'myapp_db';
+always_export;
+export_resource;
+resource_method_name 'connector';
 
 add_key 'main';
 add_key 'analytics';

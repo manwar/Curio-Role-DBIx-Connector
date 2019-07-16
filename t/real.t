@@ -4,9 +4,9 @@ use strictures 2;
 use Test2::V0;
 
 use lib 't/lib';
-use MyApp::Service::DB qw( myapp_db );
+use MyApp::Service::DB;
 
-my $db = myapp_db('main')->connector();
+my $db = myapp_db('main');
 $db->dbh->do('CREATE TABLE foo (bar)');
 
 $db->run(sub{

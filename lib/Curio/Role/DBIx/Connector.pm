@@ -2,8 +2,7 @@ package Curio::Role::DBIx::Connector;
 our $VERSION = '0.01';
 
 use DBIx::Connector;
-use Types::Common::String qw( NonEmptySimpleStr SimpleStr );
-use Types::Standard qw( InstanceOf HashRef );
+use Types::Standard qw( InstanceOf );
 
 use Moo::Role;
 use strictures 2;
@@ -110,13 +109,16 @@ Then use your new Curio class elsewhere:
 This role provides all the basics for building a Curio class
 which wraps around L<DBIx::Connector>.
 
-=head1 ARGUMENTS
+=head1 OPTIONAL ARGUMENTS
 
 =head2 connector
 
     my $connector = MyApp::Service::DB->fetch('writer')->connector();
 
 Holds the L<DBIx::Connector> object.
+
+If not specified as an argument, a new connector will be automatically
+built based on L</dsn>, L</username>, L</password>, and L</attributes>.
 
 =head1 REQUIRED METHODS
 

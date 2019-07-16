@@ -62,7 +62,7 @@ $db->run(sub{
 This role provides all the basics for building a Curio class
 which wraps around [DBIx::Connector](https://metacpan.org/pod/DBIx::Connector).
 
-# ARGUMENTS
+# OPTIONAL ARGUMENTS
 
 ## connector
 
@@ -71,6 +71,9 @@ my $connector = MyApp::Service::DB->fetch('writer')->connector();
 ```
 
 Holds the [DBIx::Connector](https://metacpan.org/pod/DBIx::Connector) object.
+
+If not specified as an argument, a new connector will be automatically
+built based on ["dsn"](#dsn), ["username"](#username), ["password"](#password), and ["attributes"](#attributes).
 
 # REQUIRED METHODS
 

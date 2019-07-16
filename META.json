@@ -45,7 +45,6 @@
             "Curio::Role" : "0.04",
             "DBIx::Connector" : "0.53",
             "Moo::Role" : "2.003000",
-            "Types::Common::String" : "1.002001",
             "Types::Standard" : "1.002001",
             "namespace::clean" : "0.27",
             "perl" : "5.008001",
@@ -55,6 +54,7 @@
       "test" : {
          "requires" : {
             "Curio" : "0.04",
+            "DBD::SQLite" : "1.44",
             "Test2::V0" : "0.000094"
          }
       }

@@ -2,7 +2,8 @@ package Curio::Role::DBIx::Connector;
 our $VERSION = '0.01';
 
 use DBIx::Connector;
-use Types::Standard qw( InstanceOf );
+use Types::Standard qw( InstanceOf HashRef );
+use Types::Common::String qw( NonEmptySimpleStr SimpleStr );
 
 use Moo::Role;
 use strictures 2;
@@ -20,6 +21,29 @@ after initialize => sub{
     return;
 };
 
+has dsn => (
+    is      => 'lazy',
+    isa     => NonEmptySimpleStr,
+    builder => 'default_dsn',
+);
+
+has username => (
+    is      => 'lazy',
+    isa     => SimpleStr,
+    builder => 'default_username',
+);
+
+sub password {
+    my ($self) = @_;
+    return $self->default_password();
+}
+
+has attributes => (
+    is      => 'lazy',
+    isa     => HashRef,
+    builder => 'default_attributes',
+);
+
 has connector => (
     is  => 'lazy',
     isa => InstanceOf[ 'DBIx::Connector' ],
@@ -28,18 +52,13 @@ has connector => (
 sub _build_connector {
     my ($self) = @_;
 
-    my $dsn        = $self->dsn();
-    my $username   = $self->can('username') ? $self->username() : '';
-    my $password   = $self->can('password') ? $self->password() : '';
-    my $attributes = $self->can('attributes') ? $self->attributes() : {};
-
     return DBIx::Connector->new(
-        $dsn,
-        $username,
-        $password,
+        $self->dsn(),
+        $self->username(),
+        $self->password(),
         {
             AutoCommit => 1,
-            %$attributes,
+            %{ $self->attributes() },
         },
     );
 }
@@ -59,6 +78,9 @@ Create a Curio class:
 
     package MyApp::Service::DB;
     
+    use MyApp::Config;
+    use MyApp::Secrets;
+    
     use Curio role => '::DBIx::Connector';
     use strictures 2;
     
@@ -73,23 +95,23 @@ Create a Curio class:
         required => 1,
     );
     
-    sub dsn {
+    sub default_dsn {
         my ($self) = @_;
         return myapp_config()->{db}->{ $self->key() }->{dsn};
     }
     
-    sub username {
+    sub default_username {
         my ($self) = @_;
         return myapp_config()->{db}->{ $self->key() }->{username};
     }
     
-    sub password {
+    sub default_password {
         my ($self) = @_;
         return myapp_secret( $self->key() . '_' . $self->username() );
     }
     
-    sub attributes {
-        return { PrintError=>1 };
+    sub default_attributes {
+        return {};
     }
     
     1;
@@ -106,50 +128,56 @@ Then use your new Curio class elsewhere:
 
 =head1 DESCRIPTION
 
-This role provides all the basics for building a Curio class
-which wraps around L<DBIx::Connector>.
+This role provides all the basics for building a Curio class which wraps around
+L<DBIx::Connector>.
 
 =head1 OPTIONAL ARGUMENTS
 
-=head2 connector
-
-    my $connector = MyApp::Service::DB->fetch('writer')->connector();
-
-Holds the L<DBIx::Connector> object.
-
-If not specified as an argument, a new connector will be automatically
-built based on L</dsn>, L</username>, L</password>, and L</attributes>.
-
-=head1 REQUIRED METHODS
-
-These methods must be implemented by the consuming curio class.
-
 =head2 dsn
 
-    sub dsn { 'dbi:...' }
-
-=head1 OPTIONAL METHODS
-
-These methods may be implemented by the consuming curio class.
+The L<DBI> C<$dsn>/C<$data_source> argument.  If not specified it will be retrieved from
+L</default_dsn>.
 
 =head2 username
 
-    sub username { '' }
-
-=head2 password
-
-    sub password { '' }
+The L<DBI> C<$username>/C<$user> argument.  If not specified it will be retrieved from
+L</default_username>.
 
 =head2 attributes
 
-    sub attributes { {} }
+The L<DBI> C<%attr> argument.  If not specified it will be retrieved from
+L</default_attributes>.
 
-C<AutoCommit> will be set to C<1> unless you directly override it
-in this hashref.
+C<AutoCommit> will be set to C<1> unless it is directly overridden in this hashref.
 
 See L<DBI/ATTRIBUTES-COMMON-TO-ALL-HANDLES>.
 
-=head1 CACHING
+=head2 connector
+
+Holds the L<DBIx::Connector> object.
+
+If not specified as an argument, a new connector will be automatically built based on
+L</dsn>, L</username>, L</password>, and L</attributes>.
+
+=head1 ATTRIBUTES
+
+=head2 password
+
+Returns the password as provided by L</default_password>.
+
+=head1 REQUIRED METHODS
+
+These methods must be implemented by the class which consumes this role.
+
+=head2 default_dsn
+
+=head2 default_username
+
+=head2 default_password
+
+=head2 default_attributes
+
+=head1 FEATURES
 
 This role sets the L<Curio::Factory/does_caching> feature.
 

@@ -5,7 +5,6 @@ use Test2::V0;
 subtest initialize => sub{
     package CC::i;
         use Curio role => '::DBIx::Connector';
-        sub dsn { 'dbi:SQLite:dbname=:memory:' }
     package main;
 
     my $factory = CC::i->factory();
@@ -16,7 +15,10 @@ subtest initialize => sub{
 subtest no_keys => sub{
     package CC::nk;
         use Curio role => '::DBIx::Connector';
-        sub dsn { 'dbi:SQLite:dbname=:memory:' }
+        sub default_dsn { 'dbi:SQLite:dbname=:memory:' }
+        sub default_username { '' }
+        sub default_password { '' }
+        sub default_attributes { {} }
     package main;
 
     my $db = CC::nk->fetch->connector();
@@ -26,7 +28,10 @@ subtest no_keys => sub{
 subtest does_keys => sub{
     package CC::dk;
         use Curio role => '::DBIx::Connector';
-        sub dsn { 'dbi:SQLite:dbname=:memory:' }
+        sub default_dsn { 'dbi:SQLite:dbname=:memory:' }
+        sub default_username { '' }
+        sub default_password { '' }
+        sub default_attributes { {} }
         add_key 'writer';
     package main;
 

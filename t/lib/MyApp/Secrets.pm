@@ -16,8 +16,8 @@ sub myapp_secret {
 }
 
 my $default_secrets = {
-    baz => 54,
-    qux => 'yellow',
+    'writer_' => '',
+    'reader_' => '',
 };
 
 has secrets => (

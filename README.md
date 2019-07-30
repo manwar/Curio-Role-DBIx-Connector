@@ -9,6 +9,9 @@ Create a Curio class:
 ```perl
 package MyApp::Service::DB;
 
+use MyApp::Config;
+use MyApp::Secrets;
+
 use Curio role => '::DBIx::Connector';
 use strictures 2;
 
@@ -23,23 +26,23 @@ has key => (
     required => 1,
 );
 
-sub dsn {
+sub default_dsn {
     my ($self) = @_;
     return myapp_config()->{db}->{ $self->key() }->{dsn};
 }
 
-sub username {
+sub default_username {
     my ($self) = @_;
     return myapp_config()->{db}->{ $self->key() }->{username};
 }
 
-sub password {
+sub default_password {
     my ($self) = @_;
     return myapp_secret( $self->key() . '_' . $self->username() );
 }
 
-sub attributes {
-    return { PrintError=>1 };
+sub default_attributes {
+    return {};
 }
 
 1;
@@ -59,60 +62,56 @@ $db->run(sub{
 
 # DESCRIPTION
 
-This role provides all the basics for building a Curio class
-which wraps around [DBIx::Connector](https://metacpan.org/pod/DBIx::Connector).
+This role provides all the basics for building a Curio class which wraps around
+[DBIx::Connector](https://metacpan.org/pod/DBIx::Connector).
 
 # OPTIONAL ARGUMENTS
 
-## connector
-
-```perl
-my $connector = MyApp::Service::DB->fetch('writer')->connector();
-```
-
-Holds the [DBIx::Connector](https://metacpan.org/pod/DBIx::Connector) object.
-
-If not specified as an argument, a new connector will be automatically
-built based on ["dsn"](#dsn), ["username"](#username), ["password"](#password), and ["attributes"](#attributes).
-
-# REQUIRED METHODS
-
-These methods must be implemented by the consuming curio class.
-
 ## dsn
 
-```perl
-sub dsn { 'dbi:...' }
-```
-
-# OPTIONAL METHODS
-
-These methods may be implemented by the consuming curio class.
+The [DBI](https://metacpan.org/pod/DBI) `$dsn`/`$data_source` argument.  If not specified it will be retrieved from
+["default\_dsn"](#default_dsn).
 
 ## username
 
-```perl
-sub username { '' }
-```
-
-## password
-
-```perl
-sub password { '' }
-```
+The [DBI](https://metacpan.org/pod/DBI) `$username`/`$user` argument.  If not specified it will be retrieved from
+["default\_username"](#default_username).
 
 ## attributes
 
-```perl
-sub attributes { {} }
-```
+The [DBI](https://metacpan.org/pod/DBI) `%attr` argument.  If not specified it will be retrieved from
+["default\_attributes"](#default_attributes).
 
-`AutoCommit` will be set to `1` unless you directly override it
-in this hashref.
+`AutoCommit` will be set to `1` unless it is directly overridden in this hashref.
 
 See ["ATTRIBUTES-COMMON-TO-ALL-HANDLES" in DBI](https://metacpan.org/pod/DBI#ATTRIBUTES-COMMON-TO-ALL-HANDLES).
 
-# CACHING
+## connector
+
+Holds the [DBIx::Connector](https://metacpan.org/pod/DBIx::Connector) object.
+
+If not specified as an argument, a new connector will be automatically built based on
+["dsn"](#dsn), ["username"](#username), ["password"](#password), and ["attributes"](#attributes).
+
+# ATTRIBUTES
+
+## password
+
+Returns the password as provided by ["default\_password"](#default_password).
+
+# REQUIRED METHODS
+
+These methods must be implemented by the class which consumes this role.
+
+## default\_dsn
+
+## default\_username
+
+## default\_password
+
+## default\_attributes
+
+# FEATURES
 
 This role sets the ["does\_caching" in Curio::Factory](https://metacpan.org/pod/Curio::Factory#does_caching) feature.
 

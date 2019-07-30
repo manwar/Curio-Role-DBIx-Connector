@@ -3,31 +3,7 @@ BEGIN { $ENV{PERL_STRICTURES_EXTRA} = 0 }
 use strictures 2;
 use Test2::V0;
 
-package MyApp::Service::DB;
-    sub myapp_config {
-        return {
-            db => {
-                writer => {
-                    dsn      => 'dbi:SQLite:dbname=:memory:',
-                    username => '',
-                },
-                reader => {
-                    dsn      => 'dbi:SQLite:dbname=:memory:',
-                    username => '',
-                },
-            },
-        };
-    }
-
-    sub myapp_secret {
-        my $key = pop;
-
-        return {
-            'writer_'      => '',
-            'reader_' => '',
-        }->{ "$key\_" };
-    }
-package main;
+use lib 't/lib';
 
 open( my $fh, '<', 'lib/Curio/Role/DBIx/Connector.pm' );
 my $content = do { local $/; <$fh> };

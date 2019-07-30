@@ -13,11 +13,11 @@ does_caching;
 
 my $default_config = {
     db => {
-        main => {
+        writer => {
             dsn => 'dbi:SQLite:dbname=:memory:',
             username => '',
         },
-        analytics => {
+        reader => {
             dsn => 'dbi:SQLite:dbname=:memory:',
             username => '',
         },

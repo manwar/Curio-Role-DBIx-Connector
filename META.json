@@ -45,7 +45,7 @@
             "Curio::Role" : "0.04",
             "DBIx::Connector" : "0.53",
             "Moo::Role" : "2.003000",
-            "Types::Common::String" : "1.002001",
+            "Scalar::Util" : "0",
             "Types::Standard" : "1.002001",
             "namespace::clean" : "0.27",
             "perl" : "5.008001",

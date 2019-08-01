@@ -2,8 +2,8 @@ package Curio::Role::DBIx::Connector;
 our $VERSION = '0.01';
 
 use DBIx::Connector;
-use Types::Standard qw( InstanceOf HashRef );
-use Types::Common::String qw( NonEmptySimpleStr SimpleStr );
+use Scalar::Util qw( blessed );
+use Types::Standard qw( InstanceOf ArrayRef );
 
 use Moo::Role;
 use strictures 2;
@@ -21,46 +21,37 @@ after initialize => sub{
     return;
 };
 
-has dsn => (
-    is      => 'lazy',
-    isa     => NonEmptySimpleStr,
-    builder => 'default_dsn',
-);
-
-has username => (
-    is      => 'lazy',
-    isa     => SimpleStr,
-    builder => 'default_username',
-);
-
-sub password {
-    my ($self) = @_;
-    return $self->default_password();
-}
-
-has attributes => (
-    is      => 'lazy',
-    isa     => HashRef,
-    builder => 'default_attributes',
+has _custom_connector => (
+    is       => 'ro',
+    isa      => InstanceOf[ 'DBIx::Connector' ] | ArrayRef,
+    init_arg => 'connector',
+    clearer  => '_clear_custom_connector',
 );
 
 has connector => (
-    is  => 'lazy',
-    isa => InstanceOf[ 'DBIx::Connector' ],
+    is       => 'lazy',
+    init_arg => undef,
 );
 
 sub _build_connector {
     my ($self) = @_;
 
-    return DBIx::Connector->new(
-        $self->dsn(),
-        $self->username(),
-        $self->password(),
-        {
-            AutoCommit => 1,
-            %{ $self->attributes() },
-        },
-    );
+    my $connector = $self->_custom_connector();
+    $self->_clear_custom_connector();
+    return $connector if blessed $connector;
+
+    my $args = defined($connector) ? $connector : [];
+
+    $args->[0] = $self->dsn();
+    $args->[1] = $self->can('username') ? $self->username() : '';
+    $args->[2] = $self->can('password') ? $self->password() : '';
+
+    my $attr = { AutoCommit=>1 };
+    $attr = { %$attr, %{ $self->attributes() } } if $self->can('attributes');
+    $attr = { %$attr, %{ $args->[3] } } if $args->[3];
+    $args->[3] = $attr;
+
+    return DBIx::Connector->new( @$args );
 }
 
 1;
@@ -84,34 +75,30 @@ Create a Curio class:
     use Curio role => '::DBIx::Connector';
     use strictures 2;
     
-    key_argument 'key';
+    key_argument 'connection_key';
     export_function_name 'myapp_db';
     
     add_key 'writer';
     add_key 'reader';
     
-    has key => (
+    has connection_key => (
         is       => 'ro',
         required => 1,
     );
     
-    sub default_dsn {
+    sub dsn {
         my ($self) = @_;
-        return myapp_config()->{db}->{ $self->key() }->{dsn};
+        return myapp_config()->{db}->{ $self->connection_key() }->{dsn};
     }
     
-    sub default_username {
+    sub username {
         my ($self) = @_;
-        return myapp_config()->{db}->{ $self->key() }->{username};
+        return myapp_config()->{db}->{ $self->connection_key() }->{username};
     }
     
-    sub default_password {
+    sub password {
         my ($self) = @_;
-        return myapp_secret( $self->key() . '_' . $self->username() );
-    }
-    
-    sub default_attributes {
-        return {};
+        return myapp_secret( $self->connection_key() . '_' . $self->username() );
     }
     
     1;
@@ -133,49 +120,45 @@ L<DBIx::Connector>.
 
 =head1 OPTIONAL ARGUMENTS
 
-=head2 dsn
-
-The L<DBI> C<$dsn>/C<$data_source> argument.  If not specified it will be retrieved from
-L</default_dsn>.
-
-=head2 username
-
-The L<DBI> C<$username>/C<$user> argument.  If not specified it will be retrieved from
-L</default_username>.
-
-=head2 attributes
-
-The L<DBI> C<%attr> argument.  If not specified it will be retrieved from
-L</default_attributes>.
-
-C<AutoCommit> will be set to C<1> unless it is directly overridden in this hashref.
-
-See L<DBI/ATTRIBUTES-COMMON-TO-ALL-HANDLES>.
-
 =head2 connector
 
 Holds the L<DBIx::Connector> object.
 
-If not specified as an argument, a new connector will be automatically built based on
-L</dsn>, L</username>, L</password>, and L</attributes>.
+May be passed as either a arrayref of arguments or a pre-created object.
 
-=head1 ATTRIBUTES
-
-=head2 password
-
-Returns the password as provided by L</default_password>.
+If not specified, a new connector will be automatically built based on L</dsn>,
+L</username>, L</password>, and L</attributes>.
 
 =head1 REQUIRED METHODS
 
-These methods must be implemented by the class which consumes this role.
+These methods must be declared in your Curio class.
 
-=head2 default_dsn
+=head2 dsn
 
-=head2 default_username
+This should return a L<DBI> C<$dsn>/C<$data_source>.  C<dbi:SQLite:dbname=:memory:>, for
+example.
 
-=head2 default_password
+=head1 OPTIONAL METHODS
 
-=head2 default_attributes
+These methods may be declared in your Curio class.
+
+=head2 username
+
+Default to an empty string.
+
+=head2 password
+
+Default to an empty string.
+
+=head2 attributes
+
+Default to an empty hashref.
+
+=head1 AUTOCOMMIT
+
+The C<AutoCommit> L<DBI> attribute is defaulted to C<1>.  You can override this by either
+doing so in L</attributes> or if you're passing an arrayref to L</connector> you can set
+it there.
 
 =head1 FEATURES
 
@@ -194,10 +177,9 @@ L<https://github.com/bluefeet/Curio-Role-DBIx-Connector/issues>
 
 =head1 ACKNOWLEDGEMENTS
 
-Thanks to L<ZipRecruiter|https://www.ziprecruiter.com/>
-for encouraging their employees to contribute back to the open
-source ecosystem.  Without their dedication to quality software
-development this distribution would not exist.
+Thanks to L<ZipRecruiter|https://www.ziprecruiter.com/> for encouraging their employees to
+contribute back to the open source ecosystem.  Without their dedication to quality
+software development this distribution would not exist.
 
 =head1 AUTHORS
 
@@ -207,18 +189,16 @@ development this distribution would not exist.
 
 Copyright (C) 2019 Aran Clary Deltac
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This program is free software: you can redistribute it and/or modify it under the terms of
+the GNU General Public License as published by the Free Software Foundation, either
+version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see L<http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with this program.
+If not, see L<http://www.gnu.org/licenses/>.
 
 =cut
 

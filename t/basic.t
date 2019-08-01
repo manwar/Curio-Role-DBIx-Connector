@@ -15,10 +15,7 @@ subtest initialize => sub{
 subtest no_keys => sub{
     package CC::nk;
         use Curio role => '::DBIx::Connector';
-        sub default_dsn { 'dbi:SQLite:dbname=:memory:' }
-        sub default_username { '' }
-        sub default_password { '' }
-        sub default_attributes { {} }
+        sub dsn { 'dbi:SQLite:dbname=:memory:' }
     package main;
 
     my $db = CC::nk->fetch->connector();
@@ -28,10 +25,7 @@ subtest no_keys => sub{
 subtest does_keys => sub{
     package CC::dk;
         use Curio role => '::DBIx::Connector';
-        sub default_dsn { 'dbi:SQLite:dbname=:memory:' }
-        sub default_username { '' }
-        sub default_password { '' }
-        sub default_attributes { {} }
+        sub dsn { 'dbi:SQLite:dbname=:memory:' }
         add_key 'writer';
     package main;
 

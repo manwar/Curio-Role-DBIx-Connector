@@ -40,18 +40,22 @@ sub _build_connector {
     $self->_clear_custom_connector();
     return $connector if blessed $connector;
 
-    my $args = defined($connector) ? $connector : [];
+    return DBIx::Connector->new( @$connector ) if $connector;
 
-    $args->[0] = $self->dsn();
-    $args->[1] = $self->can('username') ? $self->username() : '';
-    $args->[2] = $self->can('password') ? $self->password() : '';
+    my $dsn        = $self->dsn();
+    my $username   = $self->can('username') ? $self->username() : '';
+    my $password   = $self->can('password') ? $self->password() : '';
+    my $attributes = $self->can('attributes') ? $self->attributes() : {};
 
-    my $attr = { AutoCommit=>1 };
-    $attr = { %$attr, %{ $self->attributes() } } if $self->can('attributes');
-    $attr = { %$attr, %{ $args->[3] } } if $args->[3];
-    $args->[3] = $attr;
-
-    return DBIx::Connector->new( @$args );
+    return DBIx::Connector->new(
+        $dsn,
+        $username,
+        $password,
+        {
+            AutoCommit => 1,
+            %$attributes,
+        },
+    );
 }
 
 1;
@@ -115,8 +119,8 @@ Then use your new Curio class elsewhere:
 
 =head1 DESCRIPTION
 
-This role provides all the basics for building a Curio class which wraps around
-L<DBIx::Connector>.
+This role provides all the basics for building a Curio class which
+wraps around L<DBIx::Connector>.
 
 =head1 OPTIONAL ARGUMENTS
 
@@ -124,10 +128,11 @@ L<DBIx::Connector>.
 
 Holds the L<DBIx::Connector> object.
 
-May be passed as either a arrayref of arguments or a pre-created object.
+May be passed as either a arrayref of arguments or a pre-created
+object.
 
-If not specified, a new connector will be automatically built based on L</dsn>,
-L</username>, L</password>, and L</attributes>.
+If not specified, a new connector will be automatically built based on
+L</dsn>, L</username>, L</password>, and L</attributes>.
 
 =head1 REQUIRED METHODS
 
@@ -135,8 +140,8 @@ These methods must be declared in your Curio class.
 
 =head2 dsn
 
-This should return a L<DBI> C<$dsn>/C<$data_source>.  C<dbi:SQLite:dbname=:memory:>, for
-example.
+This should return a L<DBI> C<$dsn>/C<$data_source>.
+C<dbi:SQLite:dbname=:memory:>, for example.
 
 =head1 OPTIONAL METHODS
 
@@ -156,9 +161,9 @@ Default to an empty hashref.
 
 =head1 AUTOCOMMIT
 
-The C<AutoCommit> L<DBI> attribute is defaulted to C<1>.  You can override this by either
-doing so in L</attributes> or if you're passing an arrayref to L</connector> you can set
-it there.
+The C<AutoCommit> L<DBI> attribute is defaulted to C<1>.  You can
+override this by either doing so in L</attributes> or if you're
+passing an arrayref to L</connector> you can set it there.
 
 =head1 FEATURES
 
@@ -177,9 +182,10 @@ L<https://github.com/bluefeet/Curio-Role-DBIx-Connector/issues>
 
 =head1 ACKNOWLEDGEMENTS
 
-Thanks to L<ZipRecruiter|https://www.ziprecruiter.com/> for encouraging their employees to
-contribute back to the open source ecosystem.  Without their dedication to quality
-software development this distribution would not exist.
+Thanks to L<ZipRecruiter|https://www.ziprecruiter.com/> for
+encouraging their employees to contribute back to the open source
+ecosystem.  Without their dedication to quality software development
+this distribution would not exist.
 
 =head1 AUTHORS
 
@@ -189,16 +195,18 @@ software development this distribution would not exist.
 
 Copyright (C) 2019 Aran Clary Deltac
 
-This program is free software: you can redistribute it and/or modify it under the terms of
-the GNU General Public License as published by the Free Software Foundation, either
-version 3 of the License, or (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program.
-If not, see L<http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see L<http://www.gnu.org/licenses/>.
 
 =cut
 

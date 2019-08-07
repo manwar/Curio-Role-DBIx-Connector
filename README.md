@@ -17,6 +17,8 @@ use strictures 2;
 
 key_argument 'connection_key';
 export_function_name 'myapp_db';
+always_export;
+export_resource;
 
 add_key 'writer';
 add_key 'reader';
@@ -47,12 +49,12 @@ sub password {
 Then use your new Curio class elsewhere:
 
 ```perl
-use MyApp::Service::DB qw( myapp_db );
+use MyApp::Service::DB;
 
-my $db = myapp_db('writer')->connector();
+my $db = myapp_db('writer');
 
 $db->run(sub{
-    $_->do( 'CREATE TABLE foo ( bar )' );
+    my ($one) = $_->selectrow_array( 'SELECT 1' );
 });
 ```
 
@@ -67,42 +69,53 @@ wraps around [DBIx::Connector](https://metacpan.org/pod/DBIx::Connector).
 
 Holds the [DBIx::Connector](https://metacpan.org/pod/DBIx::Connector) object.
 
-May be passed as either a arrayref of arguments or a pre-created
-object.
-
-If not specified, a new connector will be automatically built based on
-["dsn"](#dsn), ["username"](#username), ["password"](#password), and ["attributes"](#attributes).
+May be passed as either ain arrayref of arguments or a pre-created
+object.  If this argument is not set then it will be built from ["dsn"](#dsn),
+["username"](#username), ["password"](#password), and ["attributes"](#attributes).
 
 # REQUIRED METHODS
 
-These methods must be declared in your Curio class.
+These methods must be implemented in your Curio class.
 
 ## dsn
 
-This should return a [DBI](https://metacpan.org/pod/DBI) `$dsn`/`$data_source`.
-`dbi:SQLite:dbname=:memory:`, for example.
+This method must return a [DBI](https://metacpan.org/pod/DBI) `$dsn`/`$data_source`, such as
+`dbi:SQLite:dbname=:memory:`.
 
 # OPTIONAL METHODS
 
-These methods may be declared in your Curio class.
+These methods may be implemented in your Curio class.
 
 ## username
 
-Default to an empty string.
+If this method is not present then an empty string will be used for
+the username when the ["connector"](#connector) is built.
 
 ## password
 
-Default to an empty string.
+If this method is not present then an empty string will be used for
+the passord when the ["connector"](#connector) is built.
 
 ## attributes
 
-Default to an empty hashref.
+If this method is not present then an empty hashref will be used for
+the attributes when the ["connector"](#connector) is built.
+
+```perl
+sub attributes {
+    return { SomeAttribute => 3 };
+}
+```
+
+Note what ["AUTOCOMMIT"](#autocommit) says.
 
 # AUTOCOMMIT
 
 The `AutoCommit` [DBI](https://metacpan.org/pod/DBI) attribute is defaulted to `1`.  You can
-override this by either doing so in ["attributes"](#attributes) or if you're
-passing an arrayref to ["connector"](#connector) you can set it there.
+override this in ["attributes"](#attributes).
+
+If the ["connector"](#connector) argument is set then this defaulting of
+`AutoCommit` is skipped.
 
 # FEATURES
 

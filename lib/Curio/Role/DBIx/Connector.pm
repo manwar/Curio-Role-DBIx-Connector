@@ -17,6 +17,7 @@ after initialize => sub{
     my $factory = $class->factory();
 
     $factory->does_caching( 1 );
+    $factory->resource_method_name( 'connector' );
 
     return;
 };
@@ -81,6 +82,8 @@ Create a Curio class:
     
     key_argument 'connection_key';
     export_function_name 'myapp_db';
+    always_export;
+    export_resource;
     
     add_key 'writer';
     add_key 'reader';
@@ -109,12 +112,12 @@ Create a Curio class:
 
 Then use your new Curio class elsewhere:
 
-    use MyApp::Service::DB qw( myapp_db );
+    use MyApp::Service::DB;
     
-    my $db = myapp_db('writer')->connector();
+    my $db = myapp_db('writer');
     
     $db->run(sub{
-        $_->do( 'CREATE TABLE foo ( bar )' );
+        my ($one) = $_->selectrow_array( 'SELECT 1' );
     });
 
 =head1 DESCRIPTION
@@ -128,42 +131,51 @@ wraps around L<DBIx::Connector>.
 
 Holds the L<DBIx::Connector> object.
 
-May be passed as either a arrayref of arguments or a pre-created
-object.
-
-If not specified, a new connector will be automatically built based on
-L</dsn>, L</username>, L</password>, and L</attributes>.
+May be passed as either ain arrayref of arguments or a pre-created
+object.  If this argument is not set then it will be built from L</dsn>,
+L</username>, L</password>, and L</attributes>.
 
 =head1 REQUIRED METHODS
 
-These methods must be declared in your Curio class.
+These methods must be implemented in your Curio class.
 
 =head2 dsn
 
-This should return a L<DBI> C<$dsn>/C<$data_source>.
-C<dbi:SQLite:dbname=:memory:>, for example.
+This method must return a L<DBI> C<$dsn>/C<$data_source>, such as
+C<dbi:SQLite:dbname=:memory:>.
 
 =head1 OPTIONAL METHODS
 
-These methods may be declared in your Curio class.
+These methods may be implemented in your Curio class.
 
 =head2 username
 
-Default to an empty string.
+If this method is not present then an empty string will be used for
+the username when the L</connector> is built.
 
 =head2 password
 
-Default to an empty string.
+If this method is not present then an empty string will be used for
+the passord when the L</connector> is built.
 
 =head2 attributes
 
-Default to an empty hashref.
+If this method is not present then an empty hashref will be used for
+the attributes when the L</connector> is built.
+
+    sub attributes {
+        return { SomeAttribute => 3 };
+    }
+
+Note what L</AUTOCOMMIT> says.
 
 =head1 AUTOCOMMIT
 
 The C<AutoCommit> L<DBI> attribute is defaulted to C<1>.  You can
-override this by either doing so in L</attributes> or if you're
-passing an arrayref to L</connector> you can set it there.
+override this in L</attributes>.
+
+If the L</connector> argument is set then this defaulting of
+C<AutoCommit> is skipped.
 
 =head1 FEATURES
 

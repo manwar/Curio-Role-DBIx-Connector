@@ -20,8 +20,8 @@ if ($content =~ m{=head1 SYNOPSIS\n\n\S.+?:\n\n(.+?)\n\S.+?:\n\n(.+?)\n=head1}s)
     }
 }
 
-my $db = myapp_db('writer')->connector();
-#$db->dbh->do('CREATE TABLE foo (bar)');
+my $db = myapp_db('writer');
+$db->dbh->do('CREATE TABLE foo (bar)');
 
 $db->run(sub{
     $_->do('INSERT INTO foo (bar) VALUES (32)');

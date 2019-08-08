@@ -119,12 +119,15 @@ If the ["connector"](#connector) argument is set then this defaulting of
 
 # FEATURES
 
-This role sets the ["does\_caching" in Curio::Factory](https://metacpan.org/pod/Curio::Factory#does_caching) feature.
+This role turns on ["does\_caching" in Curio::Factory](https://metacpan.org/pod/Curio::Factory#does_caching) and sets
+["resource\_method\_name" in Curio::Factory](https://metacpan.org/pod/Curio::Factory#resource_method_name) to `connector` (as in
+["connector"](#connector)).
 
-You can of course disable this feature.
+You can of course revert these changes:
 
 ```
 does_caching 0;
+resource_method_name undef;
 ```
 
 # SUPPORT

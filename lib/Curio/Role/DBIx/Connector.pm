@@ -179,11 +179,14 @@ C<AutoCommit> is skipped.
 
 =head1 FEATURES
 
-This role sets the L<Curio::Factory/does_caching> feature.
+This role turns on L<Curio::Factory/does_caching> and sets
+L<Curio::Factory/resource_method_name> to C<connector> (as in
+L</connector>).
 
-You can of course disable this feature.
+You can of course revert these changes:
 
     does_caching 0;
+    resource_method_name undef;
 
 =head1 SUPPORT
 

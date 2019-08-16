@@ -1,5 +1,5 @@
 package Curio::Role::DBIx::Connector;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use DBIx::Connector;
 use Scalar::Util qw( blessed );

@@ -15,6 +15,8 @@ subtest initialize => sub{
 subtest no_keys => sub{
     package CC::nk;
         use Curio role => '::DBIx::Connector';
+        add_key 'default';
+        default_key 'default';
         sub dsn { 'dbi:SQLite:dbname=:memory:' }
     package main;
 

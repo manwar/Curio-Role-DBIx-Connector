@@ -2,8 +2,10 @@ Revision history for Perl extension Curio-Role-DBIx-Connector.
 
 {{$NEXT}}
 
- - Declare dsn/username/password/attributes as Moo attributes and require that consuming
-   classes have the default_dsn/default_username/default_password/default_attributes
+ - Fix tests to work against the latest Curio, 0.08.
+ - Declare dsn/username/password/attributes as Moo attributes and
+   require that consuming classes have the default_dsn(),
+   default_username(), default_password(), and default_attributes()
    methods.
 
 0.01 2019-07-16T22:31:23Z

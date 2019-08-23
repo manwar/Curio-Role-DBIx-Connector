@@ -131,7 +131,7 @@ wraps around L<DBIx::Connector>.
 
 Holds the L<DBIx::Connector> object.
 
-May be passed as either ain arrayref of arguments or a pre-created
+May be passed as either an arrayref of arguments or a pre-created
 object.  If this argument is not set then it will be built from L</dsn>,
 L</username>, L</password>, and L</attributes>.
 
